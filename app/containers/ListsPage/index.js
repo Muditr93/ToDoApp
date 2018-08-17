@@ -42,6 +42,8 @@ export class ListsPage extends React.Component {
       this.state = {
             fopen: false,
             mopen: false,
+            errTxt: null,
+            index: null,
             fields:{
               title:'',
               message:'',
@@ -69,10 +71,12 @@ export class ListsPage extends React.Component {
     };
 
     handleCloseModal = () => {
-      this.setState({mopen: false});
+      this.setState({mopen: false, index: null, fields:{
+        title:'',
+        message:'',
+      }});
     };
     onDragStart = (ev, id) => {
-        console.log('dragstart:',id);
         ev.dataTransfer.setData("id", id);
     }
 
@@ -84,7 +88,7 @@ export class ListsPage extends React.Component {
       const newFields = fields;
       newFields[field] = value;
       this.setState({
-        ...this.state,
+        errTxt: null,
         fields: newFields
       })
     }
@@ -109,27 +113,53 @@ export class ListsPage extends React.Component {
   };
 
   handleClose = () => {
-    this.setState({ anchorEl: null });
+    this.setState({ anchorEl: null, index: null, fields:{
+      title:'',
+      message:'',
+    }, });
   };
   handleFormSubmit = () => {
-    const { fields, tasks } = this.state;
-    tasks.push({
-      ...fields,
-      category: "wip",
-    })
-    this.setState({
-      ...this.state,
-      mopen: false,
-      tasks: tasks
-    })
+    const { fields, tasks, index } = this.state;
+    if (!fields.title || !fields.message) {
+      this.setState({
+        errTxt: 'ALl fields mandatory'
+      })
+    } else {
+      if (index===0||index>0) {
+        tasks[index] = fields;
+        this.setState({
+          ...this.state,
+          fields:{
+            title:'',
+            message:'',
+          },
+          mopen: false,
+          index: null,
+          tasks: tasks
+        })
+      } else {
+        tasks.push({
+          ...fields,
+          category: "wip",
+        })
+        this.setState({
+          ...this.state,
+          fields:{
+            title:'',
+            message:'',
+          },
+          mopen: false,
+          tasks: tasks,
+          index: null,
+        })
+      }
+    }
     return indexDB.setItem('tasks', tasks)
   }
   handleStatusChange = (title, cat) => {
-    console.log(cat);
     const { fields, tasks } = this.state;
     const i =  tasks.map(tasks => tasks.title).indexOf(title)
     tasks[i].category = cat
-    console.log(tasks);
     this.setState({
       ...this.state,
       tasks: tasks,
@@ -143,11 +173,22 @@ export class ListsPage extends React.Component {
     this.setState({
       ...this.state,
       tasks: tasks,
+      index: i,
     })
     return indexDB.setItem('tasks', tasks)
   }
+  handleEdit = (i, event) => {
+    event.preventDefault();
+    const { tasks } = this.state;
+    const clone = {...tasks[i]}
+    this.setState({
+      fields: clone,
+      index: i,
+      mopen: true,
+    })
+  }
     render() {
-        var tasks = {
+        const task_array = {
             wip: [],
             inprogress: [],
             complete: []
@@ -165,27 +206,32 @@ export class ListsPage extends React.Component {
             onClick={this.handleFormSubmit}
           />,
         ];
-        this.state.tasks.forEach ((t) => {
-            tasks[t.category].push(
+        this.state.tasks.forEach ((t, index) => {
+            task_array[t.category].push(
                 <div key={t.title}
                     onDragStart = {(e) => this.onDragStart(e, t.title)}
                     draggable
                     className="draggable"
                     style={{ background: '#fafafa80' , textAlign: 'left', paddingLeft:'10px', position: 'relative' }}
                 >
-                    <h4>{t.title}</h4>
-                    <span>{t.message}</span>
-                    <IconMenu
-                      style={{ position: 'absolute', top: '-10px', right: '-10px' }}
-                      iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
-                      anchorOrigin={{horizontal: 'left', vertical: 'top'}}
-                      targetOrigin={{horizontal: 'left', vertical: 'top'}}
-                    >
-                      <MenuItem primaryText="Remove from List" onClick={() => this.handleRemove(t.title)} />
-                      {t.category == 'wip'?null:(<MenuItem primaryText="Move to Pending" onClick={() => this.handleStatusChange(t.title,'wip')} />)}
-                      {t.category == 'inprogress'?null:(<MenuItem primaryText="Move to In Progress" onClick={() => this.handleStatusChange(t.title,'inprogress')} />)}
-                      {t.category == 'complete'?null:(<MenuItem primaryText="Move to Complete" onClick={() => this.handleStatusChange(t.title,'complete')} />)}
-                    </IconMenu>
+                    <h4 style={{color: 'black'}}>{t.title}</h4>
+                    <span style={{color: '#8a8a8a', fontSize: '12px'}} >{t.message}</span>
+                    <div style={{ position: 'absolute', top: '0px', right: '0px' }}>
+                      <svg onClick={(event) => this.handleEdit(index, event)} className="Pencil"xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                      </svg>
+                      <IconMenu
+                        iconButtonElement={<IconButton><MoreVertIcon /></IconButton>}
+                        anchorOrigin={{horizontal: 'left', vertical: 'top'}}
+                        targetOrigin={{horizontal: 'left', vertical: 'top'}}
+                      >
+                        <MenuItem primaryText="Remove from List" onClick={() => this.handleRemove(t.title)} />
+                        {t.category == 'wip'?null:(<MenuItem primaryText="Move to Pending" onClick={() => this.handleStatusChange(t.title,'wip')} />)}
+                        {t.category == 'inprogress'?null:(<MenuItem primaryText="Move to In Progress" onClick={() => this.handleStatusChange(t.title,'inprogress')} />)}
+                        {t.category == 'complete'?null:(<MenuItem primaryText="Move to Complete" onClick={() => this.handleStatusChange(t.title,'complete')} />)}
+                      </IconMenu>
+                    </div>
                 </div>
             );
         });
@@ -193,28 +239,28 @@ export class ListsPage extends React.Component {
         return (
           <MuiThemeProvider>
             <div className="container-drag">
-                <h2 className="header">Tasks</h2>
+                <br />
                 <div style={{display: 'flex'}}>
                   <div className="droppable"
                       style={{flex: 1}}
                       onDragOver={(e)=>this.onDragOver(e)}
                       onDrop={(e)=>{this.onDrop(e, "wip")}}>
                       <span className="task-header">Pending</span>
-                      {tasks.wip}
+                      {task_array.wip}
                   </div>
                   <div className="droppable"
                       style={{flex: 1}}
                       onDragOver={(e)=>this.onDragOver(e)}
                       onDrop={(e)=>this.onDrop(e, "inprogress")}>
                        <span className="task-header">IN PROGRESS</span>
-                       {tasks.inprogress}
+                       {task_array.inprogress}
                   </div>
                   <div className="droppable"
                       style={{flex: 1}}
                       onDragOver={(e)=>this.onDragOver(e)}
                       onDrop={(e)=>this.onDrop(e, "complete")}>
                        <span className="task-header">COMPLETED</span>
-                       {tasks.complete}
+                       {task_array.complete}
                   </div>
                 </div>
             </div>
@@ -227,16 +273,17 @@ export class ListsPage extends React.Component {
             >
               <TextField
                 hintText="Enter Heading"
-                errorText="This field is required"
                 value={this.state.fields.title}
                 onChange={(event, newValue) => this.handleChange(newValue, 'title')}
-                /><br />
+                /><br /> <br />
               <TextField
                 hintText="Enter Description"
                 value={this.state.fields.message}
-                errorText="The error text can be as long as you want, it will wrap."
                 onChange={(event, newValue) => this.handleChange(newValue, 'message')}
               /><br />
+              <div>
+                <span style={{color: 'red'}}> {this.state.errTxt||(<br />)} </span>
+              </div>
             </Dialog>
             <FloatingActionButton style={{position: 'absolute', bottom: '20px', right: '20px'}} backgroundColor="#504fd3" onClick={this.handleOpenModal}>
               <ContentAdd />

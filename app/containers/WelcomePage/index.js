@@ -162,16 +162,8 @@ export class WelcomePage extends React.Component {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="title" color="inherit" className={classes.flex}>
-              EVM
+              Task Manager
             </Typography>
-            {auth ? (
-                loading ? (
-                  <CircularProgress color="secondary" />
-                ):(<Button onClick={this.handleLogout} variant="contained" color="secondary" autoFocus>Logout</Button>)
-              ):(
-              <Button  onClick={this.handleFormOpen} variant="contained" color="primary">
-              Login
-              </Button>)}
               <div>
                 {auth ? (<IconButton
                   aria-owns={open ? 'menu-appbar' : null}

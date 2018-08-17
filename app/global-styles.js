@@ -66,7 +66,12 @@ injectGlobal`
   background-color: #504fd3;
   width:100%;
 }
-
+.Pencil{
+  cursor: pointer;
+  margin-top: 10px;
+    height: 24px;
+    width: 24px;
+}
 .droppable {
   margin: 0px 5px;
   height: 80vh;
@@ -76,6 +81,8 @@ injectGlobal`
 }
 
 .draggable {
+  border-radius: 5px;
+  border-left: 2px solid cadetblue;
   margin: 5px;
   width: 95%;
   min-height: 80px;
