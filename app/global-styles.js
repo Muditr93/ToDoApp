@@ -34,7 +34,8 @@ injectGlobal`
   }
 
 .container-drag {
-  padding: 0 3em;
+  overflow-x: auto;
+  padding: 0 10%;
   background: #E0E0E0;
   width: 100%;
   text-align: center;
@@ -57,6 +58,7 @@ injectGlobal`
 }
 
 .task-header {
+  white-space: pre;
   padding: 5px;
   text-align: left;
   color: white;
@@ -76,7 +78,7 @@ injectGlobal`
 .draggable {
   margin: 5px;
   width: 95%;
-  height: 80px;
+  min-height: 80px;
   background-color: yellow;
   margin: 5px auto;
 }

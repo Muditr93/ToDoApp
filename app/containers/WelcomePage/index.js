@@ -9,6 +9,11 @@ import injectReducer from 'utils/injectReducer';
 import makeSelectWelcomePage from './selectors';
 import reducer from './reducer';
 import saga from './saga';
+
+import ListsPage from 'containers/ListsPage';
+import LoginForm from 'components/LoginForm';
+import { tileData } from './tileData';
+
 import LinearProgress from '@material-ui/core/LinearProgress';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { withStyles } from '@material-ui/core/styles';
@@ -19,7 +24,8 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import ListsPage from 'containers/ListsPage';
+import FlatButton from 'material-ui/FlatButton';
+import RaisedButton from 'material-ui/RaisedButton';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -30,14 +36,13 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import LoginForm from 'components/LoginForm';
-import styled from 'styled-components'
 import GridList from '@material-ui/core/GridList';
-import AddIcon from '@material-ui/icons/Add';
 import GridListTile from '@material-ui/core/GridListTile';
 import GridListTileBar from '@material-ui/core/GridListTileBar';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
-import { tileData } from './tileData';
+
+import styled from 'styled-components'
+
 import { submit, submitSuccess, submitFailure, logout, closeform, openform, displayError, authCheck } from './actions';
 const styles = theme => ({
   root: {
@@ -75,12 +80,19 @@ export class WelcomePage extends React.Component {
   state = {
     anchorEl: null,
     fopen: false,
+    mopen: false,
+    fields:{
+      title:'',
+      message:'',
+    },
     form: {
       name:'',
       password: '',
     },
     showPassword: false,
   };
+
+
   componentWillMount(){
     this.props.dispatch(authCheck());
   }
@@ -125,12 +137,26 @@ export class WelcomePage extends React.Component {
     x[prop] = event.target.value;
     this.setState({ form: x });
   };
+  handleFormSubmit = fields => {
 
+  }
   render() {
     const { classes, welcomepage: { auth, userData, loading, fopen, errText } } = this.props;
     const { anchorEl } = this.state;
     const open = Boolean(anchorEl);
-
+    const actions = [
+      <FlatButton
+        label="Cancel"
+        primary={true}
+        onClick={this.handleCloseModal}
+      />,
+      <FlatButton
+        label="Submit"
+        primary={true}
+        keyboardFocused={true}
+        onClick={this.handleFormSubmit}
+      />,
+    ];
     return (
       <div className={classes.root}>
         <AppBar position="static">
@@ -178,9 +204,6 @@ export class WelcomePage extends React.Component {
         </AppBar>
         <Wrapper>
           <ListsPage />
-          <Button style={{position: 'absolute', bottom: 20, right: 10}}variant="fab" color="primary" aria-label="Add" className={classes.button}>
-          <AddIcon />
-        </Button>
         </Wrapper>
         <Dialog
           open={fopen}
