@@ -245,7 +245,7 @@ export class ListsPage extends React.Component {
                       style={{flex: 1}}
                       onDragOver={(e)=>this.onDragOver(e)}
                       onDrop={(e)=>{this.onDrop(e, "wip")}}>
-                      <span className="task-header">Pending</span>
+                      <span className="task-header">TO DO</span>
                       {task_array.wip}
                   </div>
                   <div className="droppable"
